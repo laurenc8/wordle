@@ -1,10 +1,10 @@
 import './App.css';
 import GridLayout from './components/GridLayout';
 import { useState } from 'react';
-import raw from './words_all.txt';
 
 function App() {
   const [guessNum, setGuessNum] = useState(0)
+  const [resp, setResp] = useState('')
   const [guess0, setGuess0] = useState('');
   const [guess1, setGuess1] = useState('');
   const [guess2, setGuess2] = useState('');
@@ -23,19 +23,21 @@ function App() {
     const currentGuess = (guessNum === 0 ? guess0 : (guessNum === 1 ? guess1 : (guessNum === 2 ? guess2 : (guessNum === 3 ? guess3 : (guessNum === 4 ? guess4 : guess5)))))
     if (event.key === 'Enter' && currentGuess.length === 6) {
       setGuessNum(guessNum + 1)
+      fetch('http://127.0.0.1:5000/test',
+        {
+          method: 'GET',
+          mode: 'cors'
+        }
+      )
+        .then(function (response)  {
+          return response.json();
+        })
+        .then(function (text) {
+          console.log(text.greeting)
+          setResp(text.greeting)
+        });
     }
   }
-
-  var words = ''
-
-  fetch(raw)
-    .then(r => r.text())
-    .then(text => {
-      words = text
-      // console.log(words)
-    });
-  
-  console.log("hi", words)
 
   return (
     <div className="App">
