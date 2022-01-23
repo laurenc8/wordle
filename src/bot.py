@@ -1,3 +1,23 @@
+from flask import Flask, render_template, make_response
+from flask import redirect, request, jsonify, url_for
+app = Flask(__name__)
+
+# @app.route('/postmethod', methods = ['POST'])
+# def post_javascript_data():
+#     jsdata = request.form['word']
+#     return jsdata + " hi"
+
+@app.route('/test', methods=['GET', 'POST'])
+def testfn():
+    # GET request
+    if request.method == 'GET':
+        message = {'greeting':'Hello from Flask!'}
+        return jsonify(message)  # serialize and use JSON headers
+    # POST request
+    if request.method == 'POST':
+        print(request.get_json())  # parse as JSON
+        return 'Sucesss', 200
+
 def setup(word_len):
     words = set()
     with open("words_all.txt") as file:
@@ -42,12 +62,14 @@ def next_word(words):
     return words[0]
 
 
-word_len = int(input("Length of word"))
-words = setup(word_len)
-for guess in range(6):
-    guess = next_word(words)
-    print(guess)
-    result = input("Result? Green = G, Yellow = Y, Gray = R")
-    filter_words(words, guess, result)
+if __name__ == "__main__":
+    app.run()
+    # word_len = int(input("Length of word: "))
+    # words = setup(word_len)
+    # for guess in range(6):
+    #     guess = next_word(words)
+    #     print(guess)
+    #     result = input("Result? Green = G, Yellow = Y, Gray = R")
+    #     filter_words(words, guess, result)
 
-print(filter_words(setup(5), "raise", "rgryg"))
+    # print(filter_words(setup(5), "raise", "rgryg"))

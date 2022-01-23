@@ -1,9 +1,11 @@
 import './App.css';
 import GridLayout from './components/GridLayout';
 import { useState } from 'react';
+import $ from 'jquery';
 
 function App() {
   const [guessNum, setGuessNum] = useState(0)
+  const [resp, setResp] = useState('')
   const [guess0, setGuess0] = useState('');
   const [guess1, setGuess1] = useState('');
   const [guess2, setGuess2] = useState('');
@@ -21,10 +23,24 @@ function App() {
 
   function handleKeyDown(event) {
     if (event.key === 'Enter') {
-      console.log('do validate')
       setGuessNum(guessNum + 1)
+      fetch('http://127.0.0.1:5000/test',
+        {
+          method: 'GET',
+          mode: 'cors'
+        }
+      )
+        .then(function (response)  {
+          return response.json();
+        })
+        .then(function (text) {
+          console.log(text.greeting)
+          setResp(text.greeting)
+        });
     }
   }
+
+  
 
   return (
     <div className="App">
