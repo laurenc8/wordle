@@ -24,6 +24,11 @@ function App() {
   function handleKeyDown(event) {
     if (event.key === 'Enter') {
       setGuessNum(guessNum + 1)
+      $.post('http://127.0.0.1:5000/test', {
+        result: "rgygrg"
+      }).then(function (response) {
+        console.log(response)
+      });
       fetch('http://127.0.0.1:5000/test',
         {
           method: 'GET',

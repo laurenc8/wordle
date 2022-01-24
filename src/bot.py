@@ -1,3 +1,4 @@
+import random
 from flask import Flask, render_template, make_response
 from flask import redirect, request, jsonify, url_for
 app = Flask(__name__)
@@ -15,8 +16,10 @@ def testfn():
         return jsonify(message)  # serialize and use JSON headers
     # POST request
     if request.method == 'POST':
-        print(request.get_json())  # parse as JSON
-        return 'Sucesss', 200
+        print(request.form['result'])  # parse as JSON
+        filter_words(words, word, request.form['result'])
+        return next_word(words), 200
+        #return "hello", 200
 
 def setup(word_len):
     words = set()
@@ -32,37 +35,57 @@ def setup(word_len):
 
 def filter_words(words, prev_word, result):
     words_copy = words.copy()
-    bad = set()
-    yellow = set()
+    restrictions = {}
     for i in range(len(result)):
-        if result[i] == 'r':
-            bad.add(prev_word[i])
+        letter = prev_word[i]
+        if letter not in restrictions:
+            restrictions[letter] = {}
+            restrictions[letter]['good'] = set()
+            restrictions[letter]['bad'] = set()
+            restrictions[letter]['freq'] = 0
+            restrictions[letter]['freqKnown'] = False
+        if result[i] == 'g':
+            restrictions[letter]['good'].add(i)
+            restrictions[letter]['freq'] += 1
         elif result[i] == 'y':
-            yellow.add(prev_word[i])
+            restrictions[letter]['bad'].add(i)
+            restrictions[letter]['freq'] += 1
+        else:
+            restrictions[letter]['bad'].add(i)
+            restrictions[letter]['freqKnown'] = True
     for word in words_copy:
-        if fail(word, prev_word, result, bad, yellow):
+        if fail(word, prev_word, result, restrictions):
             words.remove(word)
 
 
-def fail(word, prev_word, result, bad, yellow):
-    new_yellow = set()
+def fail(word, prev_word, result, restrictions):
+    frequencies = {}
     for i in range(len(word)):
-        if word[i] in bad:
+        letter = word[i]
+        if result[i] == 'g' and letter != prev_word[i]:
             return True
-        if word[i] == prev_word[i] and result[i] == 'y':
-            return True
-        if result[i] != 'g' and word[i] in yellow:
-            new_yellow.add(word[i])
-        if word[i] != prev_word[i] and result[i] == 'g':
-            return True
-    return len(yellow) != len(new_yellow)
+        if i in restrictions:
+            if i in restrictions[letter]['bad']:
+                return True
+            if letter not in frequencies:
+                frequencies[letter] = 1
+            else:
+                frequencies[letter] += 1
+            if frequencies[letter] > restrictions[letter]['freq'] and restrictions['freqKnown']:
+                return True
+        for letter in frequencies:
+            if frequencies[letter] < restrictions[letter]['freq']:
+                return True
+    return False
 
 
 def next_word(words):
-    return words[0]
+    return random.sample(words,1)[0]
 
 
 if __name__ == "__main__":
+    words = setup(6)
+    word = "praise"
     app.run()
     # word_len = int(input("Length of word: "))
     # words = setup(word_len)
